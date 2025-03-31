@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Legendary Ledger 👑</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #d1e7c8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 70%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        label, select, input {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+        .homepage {
+            text-align: center;
+        }
+        .homepage button {
+            width: 250px;
+            margin: 10px;
+        }
+        .logo {
+            display: block;
+            margin: 80px auto 40px auto;
+            width: 350px;
+        }
+        .statement {
+            margin-top: 20px;
+        }
+        .statement-section {
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+        .statement-section h3 {
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+        }
+        .statement-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .underline {
+            border-top: 1px solid black;
+            margin-top: 5px;
+        }
+        .double-underline {
+            border-top: 2px double black;
+            margin-top: 5px;
+        }
+        .back-btn {
+            margin-top: 30px;
+            background-color: #f44336;
+        }
+        .generate-btn {
+            margin-top: 20px;
+            background-color: #4CAF50;
+        }
+        #itemList {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .footer {
+            position: relative;
+            text-align: right;
+            margin-top: 50px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="homepage">
+        <img src="image.png" alt="The Legendary Ledger Logo" class="logo">
+        <div class="homepage">
+            <button onclick="showForm('balance')">Balance Sheet</button>
+            <button onclick="showForm('income')">Income Statement</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="formContainer">
+        <h1 id="formTitle"></h1>
+        <label for="name">Enter Name:</label>
+        <input type="text" id="name" placeholder="Enter name">
+        <label for="date">Enter Date:</label>
+        <input type="text" id="date" placeholder="Enter date (e.g., January 1, 2025)">
+        <label for="itemName">Item Name:</label>
+        <select id="itemName" onchange="checkCustomOption()"></select>
+        <input type="text" id="customItemName" class="hidden" placeholder="Enter custom item name">
+        
+        <label for="itemValue">Value ($):</label>
+        <input type="number" id="itemValue" placeholder="Enter value">
+        <label for="itemType">Type:</label>
+        <select id="itemType"></select>
+        <button onclick="addItem()">Add Item</button>
+        <div id="itemList"></div>
+        <button class="generate-btn" onclick="generateStatement()">Make Financial Statement</button>
+        <button class="back-btn" onclick="goHome()">Back to Homepage</button>
+        <div class="footer">By Davin Jain, 2025</div>
+    </div>
+
+    <div class="container hidden" id="statementContainer">
+        <h1 id="statementTitle"></h1>
+        <div id="statementBody" class="statement"></div>
+        <button class="back-btn" onclick="goHome()">Back to Homepage</button>
+        <div class="footer">By Davin Jain, 2025</div>
+    </div>
+
+    <script>
+        let data = [];
+        let statementType = '';
+
+        function showForm(type) {
+            statementType = type;
+            document.getElementById('homepage').classList.add('hidden');
+            document.getElementById('formContainer').classList.remove('hidden');
+            document.getElementById('statementContainer').classList.add('hidden');
+            document.getElementById('formTitle').innerText = type === 'balance' ? 'Balance Sheet' : 'Income Statement';
+
+            const itemNameSelect = document.getElementById('itemName');
+            itemNameSelect.innerHTML = '';
+
+            if (type === 'balance') {
+                itemNameSelect.innerHTML += `
+                    <option value="Cash">Cash</option>
+                    <option value="Accounts Receivable">Accounts Receivable</option>
+                    <option value="Inventory">Inventory</option>
+                    <option value="Prepaid Expenses">Prepaid Expenses</option>
+                    <option value="Supplies">Supplies</option>
+                    <option value="Land">Land</option>
+                    <option value="Equipment">Equipment</option>
+                    <option value="Buildings">Buildings</option>
+                    <option value="Accounts Payable">Accounts Payable</option>
+                    <option value="Notes Payable">Notes Payable</option>
+                    <option value="Unearned Revenue">Unearned Revenue</option>
+                    <option value="Wages Payable">Wages Payable</option>
+                    <option value="Interest Payable">Interest Payable</option>
+                    <option value="Taxes Payable">Taxes Payable</option>
+                    <option value="Mortgage Payable">Mortgage Payable</option>
+                    <option value="Dividends Payable">Dividends Payable</option>
+                    <option value="Capital/Owner’s Equity">Capital/Owner’s Equity</option>
+                    <option value="Retained Earnings">Retained Earnings</option>
+                    <option value="Drawings/Withdrawals">Drawings/Withdrawals</option>
+                    <option value="Common Stock">Common Stock</option>
+                    <option value="Contributed Capital">Contributed Capital</option>
+                    <option value="Net Income">Net Income</option>
+                    <option value="Losses">Losses</option>
+                    <option value="Dividends">Dividends</option>
+                    <option value="custom">Other (Enter Custom)</option>
+                `;
+            } else {
+                itemNameSelect.innerHTML += `
+                    <option value="Sales Revenue">Sales Revenue</option>
+                    <option value="Service Revenue">Service Revenue</option>
+                    <option value="Interest Revenue">Interest Revenue</option>
+                    <option value="Rent Revenue">Rent Revenue</option>
+                    <option value="Commissions Earned">Commissions Earned</option>
+                    <option value="Fees Earned">Fees Earned</option>
+                    <option value="Gain on Sale of Assets">Gain on Sale of Assets</option>
+                    <option value="Other Income">Other Income</option>
+                    <option value="Cost of Goods Sold (COGS)">Cost of Goods Sold (COGS)</option>
+                    <option value="Salaries and Wages Expense">Salaries and Wages Expense</option>
+                    <option value="Rent Expense">Rent Expense</option>
+                    <option value="Utilities Expense">Utilities Expense</option>
+                    <option value="Supplies Expense">Supplies Expense</option>
+                    <option value="Depreciation Expense">Depreciation Expense</option>
+                    <option value="Advertising/Marketing Expense">Advertising/Marketing Expense</option>
+                    <option value="Insurance Expense">Insurance Expense</option>
+                    <option value="custom">Other (Enter Custom)</option>
+                `;
+            }
+
+            const typeSelect = document.getElementById('itemType');
+            typeSelect.innerHTML = '';
+
+            if (type === 'balance') {
+                typeSelect.innerHTML += '<option value="asset">Asset</option>';
+                typeSelect.innerHTML += '<option value="liability">Liability</option>';
+                typeSelect.innerHTML += '<option value="equity">Equity</option>';
+            } else {
+                typeSelect.innerHTML += '<option value="revenue">Revenue</option>';
+                typeSelect.innerHTML += '<option value="expense">Expense</option>';
+            }
+        }
+
+        function checkCustomOption() {
+            const itemNameSelect = document.getElementById('itemName');
+            const customItemInput = document.getElementById('customItemName');
+
+            if (itemNameSelect.value === 'custom') {
+                customItemInput.classList.remove('hidden');
+            } else {
+                customItemInput.classList.add('hidden');
+                customItemInput.value = '';
+            }
+        }
+
+        function addItem() {
+            let itemName = document.getElementById('itemName').value;
+            const customItemName = document.getElementById('customItemName').value;
+            const itemValue = parseFloat(document.getElementById('itemValue').value);
+            const itemType = document.getElementById('itemType').value;
+
+            if (itemName === 'custom' && customItemName) {
+                itemName = customItemName;
+            }
+
+            if (itemName && !isNaN(itemValue)) {
+                data.push({ name: itemName, type: itemType, value: itemValue });
+                updateItemList();
+            } else {
+                alert('Please enter valid item details.');
+            }
+        }
+
+        function updateItemList() {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '<h3>Added Items:</h3>';
+            data.forEach(item => {
+                itemList.innerHTML += `<div class="statement-item"><span>${item.name}</span><span>$${item.value.toFixed(2)}</span></div>`;
+            });
+        }
+
+        function generateStatement() {
+            document.getElementById('formContainer').classList.add('hidden');
+            document.getElementById('statementContainer').classList.remove('hidden');
+
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
+            const statementBody = document.getElementById('statementBody');
+            statementBody.innerHTML = `<h2>${statementType === 'balance' ? 'Balance Sheet' : 'Income Statement'}<br>${statementType === 'balance' ? 'As of ' + date : 'For the Year Ended ' + date}</h2><br><h3>${name}</h3>`;
+
+            let totalAssets = 0, totalLiabilities = 0, totalEquity = 0, totalRevenue = 0, totalExpenses = 0;
+
+            if (statementType === 'balance') {
+                const assets = data.filter(item => item.type === 'asset');
+                const liabilities = data.filter(item => item.type === 'liability');
+                let equity = data.filter(item => item.type === 'equity');
+
+                totalAssets = sumValues(assets);
+                totalLiabilities = sumValues(liabilities);
+                if (equity.length === 0) {
+                    const calculatedEquity = totalAssets - totalLiabilities;
+                    equity.push({ name: "Owner's Equity", type: 'equity', value: calculatedEquity });
+                }
+
+                displaySection('Assets', assets, statementBody);
+                displaySection('Liabilities', liabilities, statementBody);
+                displaySection('Equity', equity, statementBody);
+
+                statementBody.innerHTML += `
+                    <div class="statement-item underline">
+                        <strong>Total Assets</strong>
+                        <strong>$${totalAssets.toFixed(2)}</strong>
+                    </div>
+                    <div class="statement-item double-underline">
+                        <strong>Total Liabilities & Equity</strong>
+                        <strong>$${(totalLiabilities + sumValues(equity)).toFixed(2)}</strong>
+                    </div>
+                `;
+            } else {
+                const revenues = data.filter(item => item.type === 'revenue');
+                const expenses = data.filter(item => item.type === 'expense');
+
+                displaySection('Revenues', revenues, statementBody);
+                displaySection('Expenses', expenses, statementBody);
+
+                totalRevenue = sumValues(revenues);
+                totalExpenses = sumValues(expenses);
+
+                statementBody.innerHTML += `
+                    <div class="statement-item underline">
+                        <strong>Net Income</strong>
+                        <strong>$${(totalRevenue - totalExpenses).toFixed(2)}</strong>
+                    </div>
+                `;
+            }
+        }
+
+        function displaySection(title, items, container) {
+            container.innerHTML += `<div class="statement-section"><h3>${title}</h3></div>`;
+            items.forEach(item => {
+                container.innerHTML += `
+                    <div class="statement-item">
+                        <span>${item.name}</span>
+                        <span>$${item.value.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function sumValues(items) {
+            return items.reduce((acc, item) => acc + item.value, 0);
+        }
+
+        function goHome() {
+            document.getElementById('homepage').classList.remove('hidden');
+            document.getElementById('formContainer').classList.add('hidden');
+            document.getElementById('statementContainer').classList.add('hidden');
+            data = [];
+            updateItemList();
+        }
+    </script>
+</body>
+</html>
